@@ -141,7 +141,7 @@ tests.test_model_inputs(model_inputs)
 # ### Discriminator
 # Implement `discriminator` to create a discriminator neural network that discriminates on `images`.  This function should be able to reuse the variables in the neural network.  Use [`tf.variable_scope`](https://www.tensorflow.org/api_docs/python/tf/variable_scope) with a scope name of "discriminator" to allow the variables to be reused.  The function should return a tuple of (tensor output of the discriminator, tensor logits of the discriminator).
 
-# In[7]:
+# In[6]:
 
 
 def discriminator(images, reuse=False):
@@ -156,12 +156,14 @@ def discriminator(images, reuse=False):
         #conv1
         x1=tf.layers.conv2d(images,64,5,strides=2,padding='same',kernel_initializer=tf.contrib.layers.xavier_initializer())
         x1=tf.maximum(x1,0.2*x1)
+        x1=tf.nn.dropout(x1,0.8)
         #14*14*64
         
         #conv2
         x2=tf.layers.conv2d(x1,128,5,strides=2,padding='same',kernel_initializer=tf.contrib.layers.xavier_initializer())
         x2=tf.layers.batch_normalization(x2,training=True)
         x2=tf.maximum(x2,0.2*x2)
+        x2=tf.nn.dropout(x2,0.8)
         #7*7*128
         
         #conv3
@@ -181,7 +183,7 @@ tests.test_discriminator(discriminator, tf)
 # ### Generator
 # Implement `generator` to generate an image using `z`. This function should be able to reuse the variables in the neural network.  Use [`tf.variable_scope`](https://www.tensorflow.org/api_docs/python/tf/variable_scope) with a scope name of "generator" to allow the variables to be reused. The function should return the generated 28 x 28 x `out_channel_dim` images.
 
-# In[8]:
+# In[7]:
 
 
 def generator(z, out_channel_dim, is_train=True):
@@ -200,12 +202,14 @@ def generator(z, out_channel_dim, is_train=True):
         x1=tf.reshape(x1,(-1,7,7,512))
         x1=tf.layers.batch_normalization(x1,training=is_train)
         x1=tf.maximum(x1,0.2*x1)
+        x1=tf.nn.dropout(x1,0.8)
         #7*7*512
         
         #conv1
         x2=tf.layers.conv2d_transpose(x1,256,5,strides=2,padding='same')
         x2=tf.layers.batch_normalization(x2,training=is_train)
         x2=tf.maximum(x2,0.2*x2)
+        x2=tf.nn.dropout(x2,0.8)
         #14*14*256
         
         
@@ -227,7 +231,7 @@ tests.test_generator(generator, tf)
 # - `discriminator(images, reuse=False)`
 # - `generator(z, out_channel_dim, is_train=True)`
 
-# In[9]:
+# In[8]:
 
 
 def model_loss(input_real, input_z, out_channel_dim):
@@ -259,7 +263,7 @@ tests.test_model_loss(model_loss)
 # ### Optimization
 # Implement `model_opt` to create the optimization operations for the GANs. Use [`tf.trainable_variables`](https://www.tensorflow.org/api_docs/python/tf/trainable_variables) to get all the trainable variables.  Filter the variables with names that are in the discriminator and generator scope names.  The function should return a tuple of (discriminator training operation, generator training operation).
 
-# In[10]:
+# In[9]:
 
 
 def model_opt(d_loss, g_loss, learning_rate, beta1):
@@ -293,7 +297,7 @@ tests.test_model_opt(model_opt, tf)
 # ### Show Output
 # Use this function to show the current output of the generator during training. It will help you determine how well the GANs is training.
 
-# In[11]:
+# In[10]:
 
 
 """
@@ -331,7 +335,7 @@ def show_generator_output(sess, n_images, input_z, out_channel_dim, image_mode):
 # 
 # Use the `show_generator_output` to show `generator` output while you train. Running `show_generator_output` for every batch will drastically increase training time and increase the size of the notebook.  It's recommended to print the `generator` output every 100 batches.
 
-# In[20]:
+# In[11]:
 
 
 def train(epoch_count, batch_size, z_dim, learning_rate, beta1, get_batches, data_shape, data_image_mode):
@@ -380,12 +384,12 @@ def train(epoch_count, batch_size, z_dim, learning_rate, beta1, get_batches, dat
 # ### MNIST
 # Test your GANs architecture on MNIST.  After 2 epochs, the GANs should be able to generate images that look like handwritten digits.  Make sure the loss of the generator is lower than the loss of the discriminator or close to 0.
 
-# In[21]:
+# In[12]:
 
 
 batch_size =32 #None
 z_dim =128 #None
-learning_rate =0.0002 #None
+learning_rate =0.001 #None
 beta1 =0.5 #None
 
 
@@ -403,12 +407,12 @@ with tf.Graph().as_default():
 # ### CelebA
 # Run your GANs on CelebA.  It will take around 20 minutes on the average GPU to run one epoch.  You can run the whole epoch or stop when it starts to generate realistic faces.
 
-# In[ ]:
+# In[13]:
 
 
 batch_size = 16#None
 z_dim =128 #None
-learning_rate =0.0002 #None
+learning_rate =0.001 #None
 beta1 =0.5 #None
 
 
